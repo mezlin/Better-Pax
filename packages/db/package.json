@@ -1,4 +1,8 @@
-{ 
-    "name": "@repo/db", 
-    "version": "1.0.0" 
+{
+    "name": "@repo/db",
+    "version": "1.0.0",
+    "devDependencies": {
+        "prisma": "^6.16.2",
+        "ts-node": "^10.9.2"
+    }
 }

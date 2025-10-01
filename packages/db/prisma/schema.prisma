@@ -1,0 +1,91 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id String @id @default(cuid())
+  email String @unique
+  hashed_password String
+  created_at DateTime @default(now())
+
+  //Relation: A user can have many games
+  games Game[] 
+}
+
+model Scenario {
+  id String @id @default(cuid())
+  name String
+  description String
+  start_year Int 
+
+  //Relation: A scenario has many factions
+  factions Faction[]
+  //Relation: A scenario has many territories
+  territories Territory[]
+  //Relation: A scenario can be used in many games
+  games Game[] 
+}
+
+model Faction {
+  id String @id @default(cuid())
+  name String
+  color String
+  personality_profile String @db.Text //This is used for longer text fields
+  
+  //A faction belongs to one Scenario
+  scenario Scenario  @relation(fields: [scenarioId], references: [id])
+  scenarioId String //The foreign key
+  
+  //A faction has many territories
+  territories Territory[]
+  //A faction can be the player's choice in many games
+  played_in Game[] @relation("PlayedFaction")
+}
+
+model Territory {
+  id String @id @default(cuid())
+  name String 
+  geometry Json
+
+  //A territory belongs to one Faction
+  faction Faction @relation(fields: [factionId], references: [id])
+  factionId String //The foreign key
+  //A territory belongs to one Scenario
+  scenario Scenario @relation(fields: [scenarioId], references: [id])
+  scenarioId String //The foreign key
+}
+
+model Game {
+  id String @id @default(cuid())
+  created_at DateTime @default(now())
+
+  //A game belongs to one User
+  user User @relation(fields: [userId], references: [id])
+  userId String //The foreign key
+  //A game belongs to one Scenario
+  scenario Scenario @relation(fields: [scenarioId], references: [id])
+  scenarioId String //The foreign key
+  //A game has one played Faction
+  playedFaction Faction @relation("PlayedFaction", fields: [playedFactionId], references: [id])
+  playedFactionId String //The foreign key
+
+  //A game has one GameState
+  state GameState?
+}
+
+model GameState {
+  id String @id @default(cuid())
+  turn_number Int @default(1)
+  currentDate DateTime
+  diplo_status Json
+
+  //A game state belongs to one Game
+  game Game @relation(fields: [gameId], references: [id])
+  gameId String @unique //The foreign key
+}
