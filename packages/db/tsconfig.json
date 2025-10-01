@@ -1,0 +1,17 @@
+{
+    "compilerOptions": {
+        // --- Core Settings ---
+        "target": "es2020",
+        "module": "commonjs",
+        "strict": true,
+        "esModuleInterop": true,
+        "skipLibCheck": true,
+        "forceConsistentCasingInFileNames": true,
+
+        // --- The Crucial Fix ---
+        // This explicitly tells TypeScript to load the Node.js type definitions.
+        "types": ["node"]
+      },
+      // This tells TypeScript which files are part of this specific "project".
+      "include": ["prisma/**/*.ts"]
+}

@@ -2,7 +2,11 @@
     "name": "@repo/db",
     "version": "1.0.0",
     "devDependencies": {
+        "@types/node": "^24.6.1",
         "prisma": "^6.16.2",
         "ts-node": "^10.9.2"
+    },
+    "dependencies": {
+        "@prisma/client": "6.16.2"
     }
 }
