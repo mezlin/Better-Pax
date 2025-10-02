@@ -42,8 +42,6 @@ model Faction {
   scenario Scenario  @relation(fields: [scenarioId], references: [id])
   scenarioId String //The foreign key
   
-  //A faction has many territories
-  territories Territory[]
   //A faction can be the player's choice in many games
   played_in Game[] @relation("PlayedFaction")
 }
@@ -53,9 +51,6 @@ model Territory {
   name String 
   geometry Json
 
-  //A territory belongs to one Faction
-  faction Faction @relation(fields: [factionId], references: [id])
-  factionId String //The foreign key
   //A territory belongs to one Scenario
   scenario Scenario @relation(fields: [scenarioId], references: [id])
   scenarioId String //The foreign key
@@ -84,6 +79,7 @@ model GameState {
   turn_number Int @default(1)
   currentDate DateTime
   diplo_status Json
+  territories Json
 
   //A game state belongs to one Game
   game Game @relation(fields: [gameId], references: [id])
