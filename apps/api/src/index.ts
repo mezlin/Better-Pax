@@ -1,8 +1,11 @@
+import cors from 'cors';
 import express from 'express';
 import scenariosRouter from './routes/scenarios';
 
 const app = express();
 const port = 3001;
+
+app.use(cors());
 
 app.get('/', (req, res) => {
     res.send('API is running');
