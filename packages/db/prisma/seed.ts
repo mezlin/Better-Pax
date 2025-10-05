@@ -48,7 +48,6 @@ async function main() {
   await prisma.territory.create({
     data: {
       name: 'Ile-de-France',
-      factionId: france.id, // Controlled by France
       scenarioId: napoleonicScenario.id,
       geometry: {
         type: 'Polygon',
@@ -62,7 +61,6 @@ async function main() {
   await prisma.territory.create({
     data: {
       name: 'Vienna',
-      factionId: austria.id, // Controlled by Austria
       scenarioId: napoleonicScenario.id,
       geometry: {
         type: 'Polygon',
