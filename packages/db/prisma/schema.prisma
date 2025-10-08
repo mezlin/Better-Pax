@@ -10,6 +10,7 @@ datasource db {
 
 model User {
   id String @id @default(cuid())
+  name String
   email String @unique
   hashed_password String
   created_at DateTime @default(now())
@@ -48,7 +49,8 @@ model Faction {
 
 model Territory {
   id String @id @default(cuid())
-  name String 
+  name String
+  slug String @unique
   geometry Json
 
   //A territory belongs to one Scenario
