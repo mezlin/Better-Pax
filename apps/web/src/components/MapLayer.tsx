@@ -13,8 +13,8 @@ const territoryFillStyle = {
     id: 'territory-fill',
     type: 'fill' as const, //This tells MapLibre to render this data as filled polygons
     paint: {
-        'fill-color': '#088', //Fill color for the territories
-        'fill-opacity': 0.5,
+        'fill-color': ['get', 'ownerColor'] as ['get', string], //Fill color for the territories
+        'fill-opacity': 0.7,
     }
 };
 
@@ -36,10 +36,10 @@ export default function MapLayer() {
         //Function to fetch the data
         async function fetchMapData() {
             try {
-                const scenarioId = 'cmgauzhu80000u1x8akd8dbtx'; //TODO: Make this dynamic
+                const gameId = 'test-game-1'; //TODO: Make this dynamic
 
                 //Call the API endpoint
-                const response = await fetch(`http://localhost:3001/api/scenarios/${scenarioId}/map`);
+                const response = await fetch(`http://localhost:3001/api/games/${gameId}/map`);
                 const data = await response.json();
                 setMapData(data);
 

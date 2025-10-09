@@ -189,11 +189,11 @@ const germany = await prisma.faction.upsert({
   const ownerCodeToFactionId = new Map<string, string>([
     ['DE', germany.id],
     ['IT', italy.id],
-    ['US', usa.id],
     ['UK', uk.id],
     ['FR', france.id],
     ['Russia', ussr.id],
     ['ES', spain.id],
+    ['United States of America', usa.id],
   ])
 
   //Get all territories

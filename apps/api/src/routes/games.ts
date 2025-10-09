@@ -13,16 +13,16 @@ router.get('/:gameId/map', async (req, res) => {
     const gameState = await prisma.gameState.findUnique({
       where: { gameId: gameId },
       include: {
-        Game: { include: { Scenario: true } }, // Also fetch the related game and scenario info
+        game: { include: { scenario: true } }, // Also fetch the related game and scenario info
       },
     });
 
-    if (!gameState || !gameState.Game) {
+    if (!gameState || !gameState.game) {
       return res.status(404).json({ error: 'Game not found' });
     }
 
-    const scenarioId = gameState.Game.scenarioId;
-    const territoryStates = gameState.territoryStates as Record<string, string>; // { territoryId: factionId }
+    const scenarioId = gameState.game.scenarioId;
+    const territoryStates = gameState.territories as Record<string, string>; // { territoryId: factionId }
 
     // 2. Fetch all factions and territories for this scenario
     const factions = await prisma.faction.findMany({ where: { scenarioId } });
@@ -44,7 +44,7 @@ router.get('/:gameId/map', async (req, res) => {
         // Get the original GeoJSON feature from the territory's geometry
         const feature = territory.geometry as any;
         
-        // Add our dynamic game data to the properties
+        // Add the dynamic game data to the properties
         feature.properties.ownerId = ownerId;
         feature.properties.ownerColor = ownerColor;
         
