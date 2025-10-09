@@ -29,9 +29,9 @@ router.get('/:gameId/map', async (req, res) => {
     const territories = await prisma.territory.findMany({ where: { scenarioId } });
 
     // 3. Create a quick lookup map for faction colors
-    const factionColorMap = new Map<string, string>();
+    const factionDataMap = new Map<string, {name: string, color: string}>();
     for (const faction of factions) {
-      factionColorMap.set(faction.id, faction.color);
+      factionDataMap.set(faction.id, {name: faction.name, color: faction.color});
     }
 
     // 4. Build the final GeoJSON FeatureCollection
@@ -39,15 +39,15 @@ router.get('/:gameId/map', async (req, res) => {
       type: 'FeatureCollection',
       features: territories.map(territory => {
         const ownerId = territoryStates[territory.id];
-        const ownerColor = ownerId ? factionColorMap.get(ownerId) : '#808080'; // Default to gray if no owner
-
-        // Get the original GeoJSON feature from the territory's geometry
+        const ownerData = ownerId ? factionDataMap.get(ownerId) : null;
         const feature = territory.geometry as any;
+
         
         // Add the dynamic game data to the properties
         feature.properties.ownerId = ownerId;
-        feature.properties.ownerColor = ownerColor;
-        
+        feature.properties.ownerColor = ownerData ? ownerData.color : '#808080'; // Default gray if unowned
+        feature.properties.ownerName = ownerData ? ownerData.name : 'Unowned';
+
         return feature;
       }),
     };
