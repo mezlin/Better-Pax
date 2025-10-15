@@ -1,8 +1,7 @@
-import { use, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import Map, {Source, Layer, Popup} from 'react-map-gl/maplibre';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import type { MapLayerMouseEvent } from 'react-map-gl/maplibre';
-import {booleanIntersects, pointOnFeature, union} from '@turf/turf';
 
 
 //Define a type for the GeoJSON data for better type safety
@@ -75,83 +74,22 @@ export default function MapLayer() {
                 console.error('Failed to fetch map data:', e);
             }
         }
+
+        //Fetches the pre calculated faction label points
+        async function fetchFactionLabelData() {
+            try {
+                const response = await fetch(`http://localhost:3001/api/games/${gameId}/factions`);
+                const data = await response.json();
+                setFactionLabelData(data);
+            } catch (e) {
+                console.error('Failed to fetch faction label data:', e);
+            }
+        }
         
 
         fetchMapData();
+        fetchFactionLabelData();
     }, [gameId]); 
-
-    //Effect to generate faction label data once mapData is available
-    useEffect(() => {
-        if(!mapData) return;
-
-        //Group all territories by their owner's name
-        const territoriesByOwner = mapData.features.reduce((fac, feature) => {
-            const ownerName = feature.properties?.ownerName;
-            if(ownerName) {
-                if(!fac[ownerName]) {
-                    fac[ownerName] = [];
-                }
-                fac[ownerName].push(feature);
-            }
-
-            return fac;
-
-        }, {} as Record<string, Feature[]>);
-
-        //For each faction create a single label feature
-        const labelFeatures: Feature[] = [];
-        for (const ownerName in territoriesByOwner) {
-            const ownedTerritories = territoriesByOwner[ownerName];
-            const visitedTerritories = new Set<string>(); //To track visited territories
-
-            //Find contiguous blobs of land 
-            for (const territory of ownedTerritories) {
-                if(visitedTerritories.has(territory.id as string)) continue;
-
-                const currentBlob: Feature[] = [];
-                const queue: Feature[] = [territory];
-                visitedTerritories.add(territory.id as string);
-
-                //standard BFS to find all connected territories
-                while(queue.length > 0) {
-                    const current = queue.shift()!;
-                    currentBlob.push(current);
-
-                    for (const other of ownedTerritories) {
-                        if(!visitedTerritories.has(other.id as string) && booleanIntersects(current, other)) {
-                            visitedTerritories.add(other.id as string);
-                            queue.push(other);
-                        }
-                    }
-                }
-                if (currentBlob.length > 0) {
-                    let mergedPolygon: any = currentBlob[0];
-
-                    for (let i = 1; i < currentBlob.length; i++) {
-                        if(mergedPolygon) {
-                            mergedPolygon = union(mergedPolygon, currentBlob[i]);
-                        }
-                    }
-                
-
-                    if (mergedPolygon) {
-                        const labelPoint = pointOnFeature(mergedPolygon);
-                        labelFeatures.push({
-                            ...labelPoint,
-                            properties: {
-                                name: ownerName.toUpperCase(),
-                            },
-                        });
-                    }
-                }
-            }
-        }
-
-        setFactionLabelData({
-            type: 'FeatureCollection',
-            features: labelFeatures,
-        });
-    }, [mapData]); //This ensures this effect re runs whenever mapData changes
 
     //Click handler for territories
     const onMapClick = (event: MapLayerMouseEvent) => {
