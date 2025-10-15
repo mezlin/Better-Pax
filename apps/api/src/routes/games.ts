@@ -59,4 +59,61 @@ router.get('/:gameId/map', async (req, res) => {
   }
 });
 
+//Endpoint to get current game state
+router.get('/:gameId/state', async (req, res) => {
+  const {gameId} = req.params;
+
+  try {
+    const gameState = await prisma.gameState.findUnique({
+      where: {gameId: gameId},
+    });
+
+    if(!gameState) {
+      return res.status(404).json({error: 'Game not found'});
+    }
+    res.json(gameState);
+  } catch (error) {
+    console.error('Failed to fetch game state:', error);
+    res.status(500).json({error: 'Internal server error'});
+  }
+});
+
+//Endpoint for advancing the turn
+router.post('/:gameId/adTurn', async (req, res) => {
+  const {gameId} = req.params;
+
+  try {
+    const currentState = await prisma.gameState.findUnique({
+      where: {gameId: gameId},
+    });
+
+    if(!currentState) {
+      return res.status(404).json({error: 'Game not found'});
+    }
+
+    const newDate = new Date(currentState.currentDate);
+    newDate.setMonth(newDate.getMonth() + 1);
+
+    //TODO : Future AI logic here
+    console.log(`AI actions would be processed for turn ${currentState.turn_number + 1}`);
+
+    const newState = await prisma.gameState.update({
+      where: {gameId: gameId},
+      data: {
+        turn_number: {
+          increment: 1,
+        },
+        currentDate: newDate,
+      },
+    });
+
+    res.json(newState);
+
+  } catch (error) {
+    console.error('Failed to advance turn:', error);
+    res.status(500).json({error: 'Internal server error'});
+  }
+
+});
+
 export default router;

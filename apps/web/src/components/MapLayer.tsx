@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import Map, {Source, Layer, Popup} from 'react-map-gl/maplibre';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import type { MapLayerMouseEvent } from 'react-map-gl/maplibre';
@@ -10,6 +10,11 @@ type FeatureCollection = {
     features: any[];
 };
 type Feature = GeoJSON.Feature;
+
+type GameState = {
+    turn_number: number;
+    currentDate: string;
+};
 
 //This layer will handle the colored fill for the territories
 const territoryFillStyle = {
@@ -59,37 +64,68 @@ export default function MapLayer() {
     //State to manage popup for territory details
     const [popupInfo, setPopupInfo] = useState<{longitude: number, latitude: number, name: string} | null>(null);
 
+    //State to hold the current game state
+    const [gameState, setGameState] = useState<GameState | null>(null);
+
+    //State to manage loading state to prevent double-clicks
+    const [isLoading, setIsLoading] = useState(false);
+
     const gameId = 'test-game-1'; //TODO: Make this dynamic
 
+    //Function to fetch all data related to map
+    const fetchAllGameData = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      // Fetch map, state, and label data in parallel for speed.
+      const [mapRes, stateRes, factionRes] = await Promise.all([
+        fetch(`http://localhost:3001/api/games/${gameId}/map`),
+        fetch(`http://localhost:3001/api/games/${gameId}/state`),
+        fetch(`http://localhost:3001/api/games/${gameId}/factions`)
+      ]);
+
+      if (!mapRes.ok || !stateRes.ok || !factionRes.ok) {
+        throw new Error('Failed to fetch game data');
+      }
+      
+      const mapData = await mapRes.json();
+      const stateData = await stateRes.json();
+      const factionLabelData = await factionRes.json();
+
+      setMapData(mapData);
+      setGameState(stateData);
+      setFactionLabelData(factionLabelData);
+
+    } catch (e) {
+      console.error('Failed to fetch game data:', e);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [gameId]);
+
+    //Initial data load when component mounts
     useEffect(() => {
-        //Function to fetch the data
-        async function fetchMapData() {
-            try {
-                //Call the API endpoint
-                const response = await fetch(`http://localhost:3001/api/games/${gameId}/map`);
-                const data = await response.json();
-                setMapData(data);
+        fetchAllGameData();
+    }, [fetchAllGameData]);
+    
+    const handleNextTurn = async () => {
+        if (isLoading) return; // Prevent clicking while a turn is processing.
+        setIsLoading(true);
+        try {
+        const response = await fetch(`http://localhost:3001/api/games/${gameId}/turn`, {
+            method: 'POST',
+        });
 
-            }catch(e) {
-                console.error('Failed to fetch map data:', e);
-            }
+        if (!response.ok) throw new Error('Failed to advance turn');
+
+        // After the turn is successfully advanced on the backend,
+        // we refresh ALL data to show the new state of the world.
+        await fetchAllGameData();
+
+        } catch (e) {
+            console.error(e);
+            setIsLoading(false);
         }
-
-        //Fetches the pre calculated faction label points
-        async function fetchFactionLabelData() {
-            try {
-                const response = await fetch(`http://localhost:3001/api/games/${gameId}/factions`);
-                const data = await response.json();
-                setFactionLabelData(data);
-            } catch (e) {
-                console.error('Failed to fetch faction label data:', e);
-            }
-        }
-        
-
-        fetchMapData();
-        fetchFactionLabelData();
-    }, [gameId]); 
+    };
 
     //Click handler for territories
     const onMapClick = (event: MapLayerMouseEvent) => {
@@ -110,6 +146,7 @@ export default function MapLayer() {
   };
 
     return (
+    <div className="relative w-screen h-screen">
         <Map
             initialViewState={{
                 longitude: 10, //Cenetered more on Europe
@@ -156,5 +193,30 @@ export default function MapLayer() {
                 </Popup>
             )}
         </Map>
+
+        {/* Simple UI overlay for game info and controls */}
+        <div className="absolute top-4 left-4 bg-gray-900 bg-opacity-75 text-white p-4 rounded-lg shadow-lg">
+            <h2 className= "text-xl font-bold">Turn Information</h2>
+            {gameState ? (
+                <>
+                    <p>Turn: <span className="font-semibold">{gameState.turn_number}</span></p>
+                    <p>Date: <span className="font-semibold">{new Date(gameState.currentDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long' })}</span></p>
+                </>
+            ) : (
+                <p>Loading game state...</p>
+            )}
+        </div>
+
+        <div className="absolute bottom-10 left-1/2 -translate-x-1/2">
+            <button 
+                onClick={handleNextTurn}
+                disabled={isLoading}
+                className="px-8 py-4 bg-blue-600 text-white font-bold text-xl rounded-lg shadow-xl hover:bg-blue-700 disabled:bg-gray-500 disabled:cursor-not-allowed transition-all duration-300"
+            >
+                {isLoading ? 'Processing...' : 'Next Turn'}
+            </button>
+        </div>
+    </div>
+            
     );
 }
