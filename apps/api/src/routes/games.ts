@@ -95,7 +95,7 @@ router.post('/:gameId/adTurn', async (req, res) => {
     newDate.setMonth(newDate.getMonth() + 1);
 
     //TODO : Future AI logic here
-    console.log(`AI actions would be processed for turn ${currentState.turn_number + 1}`);
+    console.log(`Processing AI actions for turn ${currentState.turn_number + 1}`);
 
     const newState = await prisma.gameState.update({
       where: {gameId: gameId},

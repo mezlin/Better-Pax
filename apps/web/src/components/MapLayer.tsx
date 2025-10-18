@@ -111,7 +111,7 @@ export default function MapLayer() {
         if (isLoading) return; // Prevent clicking while a turn is processing.
         setIsLoading(true);
         try {
-        const response = await fetch(`http://localhost:3001/api/games/${gameId}/turn`, {
+        const response = await fetch(`http://localhost:3001/api/games/${gameId}/adTurn`, {
             method: 'POST',
         });
 
