@@ -19,6 +19,9 @@ importers:
       express:
         specifier: ^5.1.0
         version: 5.1.0
+      ollama:
+        specifier: ^0.6.0
+        version: 0.6.0
     devDependencies:
       '@types/cors':
         specifier: ^2.8.19
@@ -2365,6 +2368,9 @@ packages:
   ohash@2.0.11:
     resolution: {integrity: sha512-RdR9FQrFwNBNXAr4GixM8YaRZRJ5PUWbKYbE5eOsrwAjJW0q2REGcf79oYPsLyskQCZG1PLN+S/K1V00joZAoQ==}
 
+  ollama@0.6.0:
+    resolution: {integrity: sha512-FHjdU2Ok5x2HZsxPui/MBJZ5J+HzmxoWYa/p9wk736eT+uAhS8nvIICar5YgwlG5MFNjDR6UA5F3RSKq+JseOA==}
+
   on-finished@2.4.1:
     resolution: {integrity: sha512-oVlzkg3ENAhCk2zdv7IJwd/QUD4z2RxRwpkcGY8psCVcCYZNq4wYnVWALHM+brtuJjePWiYF/ClmuDr8Ch5+kg==}
     engines: {node: '>= 0.8'}
@@ -2944,6 +2950,9 @@ packages:
   vary@1.1.2:
     resolution: {integrity: sha512-BNGbWLfd0eUPabhkXUVm0j8uuvREyTh5ovRa/dyow/BqAbZJyC+5fU+IzQOzmAKzYqYRAISoRhdQr3eIZ/PXqg==}
     engines: {node: '>= 0.8'}
+
+  whatwg-fetch@3.6.20:
+    resolution: {integrity: sha512-EqhiFU6daOA8kpjOWTL0olhVOF3i7OrFzSYiGsEMB8GcXS+RrzauAERX65xMeNWVqxA6HXH2m69Z9LaKKdisfg==}
 
   which-boxed-primitive@1.1.1:
     resolution: {integrity: sha512-TbX3mj8n0odCBFVlY8AxkqcHASw3L60jIuF8jFP78az3C2YhmGvqbHBpAjTRH2/xqYunrJ9g1jSyjCjpoWzIAA==}
@@ -6143,6 +6152,10 @@ snapshots:
 
   ohash@2.0.11: {}
 
+  ollama@0.6.0:
+    dependencies:
+      whatwg-fetch: 3.6.20
+
   on-finished@2.4.1:
     dependencies:
       ee-first: 1.1.1
@@ -6847,6 +6860,8 @@ snapshots:
   v8-compile-cache-lib@3.0.1: {}
 
   vary@1.1.2: {}
+
+  whatwg-fetch@3.6.20: {}
 
   which-boxed-primitive@1.1.1:
     dependencies:

@@ -14,7 +14,8 @@
   "dependencies": {
     "@prisma/client": "6.16.2",
     "cors": "^2.8.5",
-    "express": "^5.1.0"
+    "express": "^5.1.0",
+    "ollama": "^0.6.0"
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",

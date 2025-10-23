@@ -196,7 +196,6 @@ export default function MapLayer() {
 
         {/* Simple UI overlay for game info and controls */}
         <div className="absolute top-4 left-4 bg-gray-900 bg-opacity-75 text-white p-4 rounded-lg shadow-lg">
-            <h2 className= "text-xl font-bold">Turn Information</h2>
             {gameState ? (
                 <>
                     <p>Turn: <span className="font-semibold">{gameState.turn_number}</span></p>
