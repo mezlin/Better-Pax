@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from 'react';
 import Map, {Source, Layer, Popup} from 'react-map-gl/maplibre';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import type { MapLayerMouseEvent } from 'react-map-gl/maplibre';
+import CounselorChat from './CounselorChat';
 
 
 //Define a type for the GeoJSON data for better type safety
@@ -215,6 +216,8 @@ export default function MapLayer() {
                 {isLoading ? 'Processing...' : 'Next Turn'}
             </button>
         </div>
+
+        <CounselorChat gameId={gameId} />
     </div>
             
     );
