@@ -3,6 +3,7 @@ import Map, {Source, Layer, Popup} from 'react-map-gl/maplibre';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import type { MapLayerMouseEvent } from 'react-map-gl/maplibre';
 import CounselorChat from './CounselorChat';
+import {User} from 'lucide-react';
 
 
 //Define a type for the GeoJSON data for better type safety
@@ -71,6 +72,9 @@ export default function MapLayer() {
     //State to manage loading state to prevent double-clicks
     const [isLoading, setIsLoading] = useState(false);
 
+    //State variable for Counselor Chat visibility
+    const [isChatVisible, setIsChatVisible] = useState(false);
+
     const gameId = 'test-game-1'; //TODO: Make this dynamic
 
     //Function to fetch all data related to map
@@ -133,21 +137,21 @@ export default function MapLayer() {
         const features = event.features;
         // Check if the click happened on our 'territory-fill' layer
         if (features && features.length > 0 && features[0].layer.id === 'territory-fill') {
-        const feature = features[0];
-        // Set the popup info with coordinates and the territory's name
-        setPopupInfo({
-            longitude: event.lngLat.lng,
-            latitude: event.lngLat.lat,
-            name: feature.properties.name,
-        });
+            const feature = features[0];
+            // Set the popup info with coordinates and the territory's name
+            setPopupInfo({
+                longitude: event.lngLat.lng,
+                latitude: event.lngLat.lat,
+                name: feature.properties.name,
+            });
         } else {
-        // If the user clicks anywhere else, close the popup
-        setPopupInfo(null);
+            // If the user clicks anywhere else, close the popup
+            setPopupInfo(null);
         }
   };
 
     return (
-    <div className="relative w-screen h-screen">
+    <div className="relative w-screen h-screen overflow-hidden">
         <Map
             initialViewState={{
                 longitude: 10, //Cenetered more on Europe
@@ -155,7 +159,7 @@ export default function MapLayer() {
                 zoom: 4,
             }}
             style={{width: '100%', height: '100vh'}}
-            mapStyle="https://api.maptiler.com/maps/0199b464-830b-79e7-9d86-b7e0dd2c4e8a/style.json?key=ixHYDS2Ueu45yt4aX67M" //URL points to the custom map
+            mapStyle="https://api.maptiler.com/maps/0199b464-830b-79e7-9d86-b7e0dd2c4e8a/style.json?key=ixHYDS2Ueu45yt4aX67M"
             onClick={onMapClick}
             interactiveLayerIds={['territory-fill']} //This makes only the territory-fill layer interactive
         > 
@@ -207,6 +211,18 @@ export default function MapLayer() {
             )}
         </div>
 
+        {!isChatVisible && (
+            <div className="absolute top-4 right-4 z-20 ">
+                <button
+                    title="Open Advisor"
+                    onClick={() => setIsChatVisible(true)}
+                    className="bg-gray-900 bg-opacity-75 text-white p-3 rounded-lg shadow-lg hover:bg-opacity-100 transition-colors"
+                >
+                    <User className="w-6 h-6" />
+                </button>
+            </div>
+        )}
+
         <div className="absolute bottom-10 left-1/2 -translate-x-1/2">
             <button 
                 onClick={handleNextTurn}
@@ -217,7 +233,11 @@ export default function MapLayer() {
             </button>
         </div>
 
-        <CounselorChat gameId={gameId} />
+        <CounselorChat 
+            gameId={gameId}
+            isOpen={isChatVisible}
+            onClose={() => setIsChatVisible(false)}
+        />
     </div>
             
     );

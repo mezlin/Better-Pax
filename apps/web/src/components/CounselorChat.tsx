@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, FormEvent, useEffect, useRef } from 'react';
+import React, { useState, FormEvent, useEffect, useRef } from 'react';
+import { X } from 'lucide-react';
 
 // A type definition for a single chat message
 type Message = {
@@ -8,7 +9,13 @@ type Message = {
   content: string;
 };
 
-export default function CounselorChat({ gameId }: { gameId: string }) {
+type CounselorChatProps = {
+  gameId: string;
+  isOpen: boolean;
+  onClose: () => void;
+};
+
+export default function CounselorChat({ gameId, isOpen, onClose }: CounselorChatProps) {
   // State to hold the array of all chat messages
   const [messages, setMessages] = useState<Message[]>([]);
   // State to control the user's text input
@@ -89,11 +96,26 @@ export default function CounselorChat({ gameId }: { gameId: string }) {
     }
   };
 
+  const handleClose = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onClose();
+  };
+
   return (
-    <div className="absolute bottom-24 right-4 w-96 h-[500px] flex flex-col bg-gray-900 bg-opacity-80 backdrop-blur-sm text-white rounded-lg shadow-2xl">
+    isOpen &&
+    <div className={`absolute top-0 right-0 h-full w-96 flex flex-col bg-gray-900 bg-opacity-80 backdrop-blur-sm text-white shadow-2xl z-30 transition-transform duration-300 ease-in-out
+                  ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}> 
       {/* Header */}
-      <div className="p-4 border-b border-gray-700">
-        <h3 className="font-bold text-lg">Strategic Counselor</h3>
+      <div className="flex justify-between items-center p-4 border-b border-gray-700">
+        <h3 className="font-bold text-lg">Strategic Advisor</h3>
+        <button 
+          onClick={handleClose}
+          title="Close Advisor"
+          className="p-1 rounded-full text-gray-400 hover:bg-gray-700 hover:text-white transition-colors"
+        >
+          <X className="w-5 h-5" />
+        </button>
       </div>
 
       {/* Message History */}
@@ -116,7 +138,7 @@ export default function CounselorChat({ gameId }: { gameId: string }) {
             type="text"
             value={input}
             onChange={e => setInput(e.target.value)}
-            placeholder={isLoading ? "Counselor is thinking..." : "Ask for advice..."}
+            placeholder={isLoading ? "Advisor is thinking..." : "Ask for advice..."}
             disabled={isLoading}
             className="w-full p-2 bg-gray-800 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
           />
