@@ -3,7 +3,10 @@ import Map, {Source, Layer, Popup} from 'react-map-gl/maplibre';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import type { MapLayerMouseEvent } from 'react-map-gl/maplibre';
 import CounselorChat from './CounselorChat';
-import {User} from 'lucide-react';
+import DiploChat from './DiploChat';
+import {MessageSquare, User} from 'lucide-react';
+import { latest } from 'maplibre-gl';
+import { type } from 'node:os';
 
 
 //Define a type for the GeoJSON data for better type safety
@@ -17,6 +20,14 @@ type GameState = {
     turn_number: number;
     currentDate: string;
 };
+
+type PopupInfo = {
+    longitude: number;
+    latitude: number;
+    territoryName: string;
+    factionId: string;
+    factionName: string;
+}
 
 //This layer will handle the colored fill for the territories
 const territoryFillStyle = {
@@ -64,7 +75,7 @@ export default function MapLayer() {
     const [factionLabelData, setFactionLabelData] = useState<FeatureCollection | null>(null);
 
     //State to manage popup for territory details
-    const [popupInfo, setPopupInfo] = useState<{longitude: number, latitude: number, name: string} | null>(null);
+    const [popupInfo, setPopupInfo] = useState<PopupInfo | null>(null);
 
     //State to hold the current game state
     const [gameState, setGameState] = useState<GameState | null>(null);
@@ -74,6 +85,9 @@ export default function MapLayer() {
 
     //State variable for Counselor Chat visibility
     const [isChatVisible, setIsChatVisible] = useState(false);
+
+    //State variable for to manage diplo chat
+    const [chatTarget, setChatTarget] = useState<{factionId: string, factionName: string} | null>(null);
 
     const gameId = 'test-game-1'; //TODO: Make this dynamic
 
@@ -142,7 +156,9 @@ export default function MapLayer() {
             setPopupInfo({
                 longitude: event.lngLat.lng,
                 latitude: event.lngLat.lat,
-                name: feature.properties.name,
+                territoryName: feature.properties.name,
+                factionId: feature.properties.factionId,
+                factionName: feature.properties.factionName,
             });
         } else {
             // If the user clicks anywhere else, close the popup
@@ -193,8 +209,28 @@ export default function MapLayer() {
                     latitude={popupInfo.latitude}
                     onClose={() => setPopupInfo(null)}
                     closeButton={false}
+                    className="ui-no-map-click"
+                    style={{ backgroundColor: 'rgba(30, 41, 59, 0.8)', color: 'white', borderRadius: '4px' }}
                 >
-                    {popupInfo.name}
+                    <div className="p-2">
+                        <h4 className="font-bold text-lg">{popupInfo.territoryName}</h4>
+                        <p className="text-sm">Owner: {popupInfo.factionName}</p>
+
+                        {/* This button opens the main diplomacy chat */}
+                      <button
+                        onClick={() => {
+                          // Set the target for the chat modal
+                          setChatTarget({ factionId: popupInfo.factionId, factionName: popupInfo.factionName });
+                          // Close this small popup
+                          setPopupInfo(null); 
+                        }}
+                        className="w-full mt-2 px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                      >
+                        <MessageSquare className="w-4 h-4 inline-block mr-1" />
+                        Chat with {popupInfo.factionName}
+                      </button>
+                      {/* You can add more buttons here later (e.g., "Declare War") */}
+                    </div>
                 </Popup>
             )}
         </Map>
@@ -238,6 +274,15 @@ export default function MapLayer() {
             isOpen={isChatVisible}
             onClose={() => setIsChatVisible(false)}
         />
+
+        {chatTarget && (
+          <DiploChat
+            gameId={gameId}
+            factionId={chatTarget.factionId}
+            factionName={chatTarget.factionName}
+            onClose={() => setChatTarget(null)}
+          />
+        )}
     </div>
             
     );
